@@ -6,13 +6,12 @@ import json
 file_path = 'cnc.txt'
 api_url = 'http://127.0.0.1:8000/api/machines/'
 
-# JWT of the user
 
 
 url = "http://127.0.0.1:8000/api/login/"
 
 payload = json.dumps({
-  "employee_id": "18MTR065",
+  "employee_id": "18ITR011",
   "password": "9942142",
   "role": "manager"
 })
@@ -109,7 +108,6 @@ def send_machine_data(machine):
     else:
         print(f"Failed to send data for {machine['name']}. Status Code: {response.status_code}, Response: {response.text}")
 
-# Main function to parse the file and send the data
 def main():
     while(True):
         machines = parse_cnc_file(file_path)
