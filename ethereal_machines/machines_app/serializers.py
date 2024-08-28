@@ -1,10 +1,6 @@
 # machines_app/serializers.py
 from rest_framework import serializers
 from .models import Machine, DynamicData
-# class MachineSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Machine
-#         fields = ['id', 'name', 'acceleration', 'velocity']
 
 
 

@@ -1,7 +1,6 @@
 # machines_app/models.py
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.utils import timezone
 
 class UserManager(BaseUserManager):
     def create_user(self, employee_id, password=None, role=None):

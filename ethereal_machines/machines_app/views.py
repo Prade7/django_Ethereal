@@ -3,17 +3,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Machine, DynamicData, User
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
-# machines_app/views.py
 
 import jwt
 from datetime import datetime, timedelta
-# machines_app/views.py
 from django.contrib.auth.hashers import make_password, check_password
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from .serializers import MachineSerializer
@@ -30,13 +25,10 @@ class LoginView(APIView):
         if not employee_id or not password or not role:
             return Response({"error": "Employee ID, password, and role are required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if the employee_id exists
         try:
             user = User.objects.get(employee_id=employee_id)
             
-            # If the user exists, check the password
             if check_password(password, user.password_hash):
-                # Password is correct, create a JWT token
                 payload = {
                     "employee_id" : f"{employee_id}",
                     "role" : f"{role}"
@@ -44,18 +36,15 @@ class LoginView(APIView):
                 token = encode_jwt(payload=payload)
                 return Response(token, status=status.HTTP_200_OK)
             else:
-                # Password is incorrect
                 return Response({"error": "Incorrect password."}, status=status.HTTP_403_FORBIDDEN)
 
         except User.DoesNotExist:
-            # If employee_id does not exist, create a new user
             user = User.objects.create(
                 employee_id=employee_id,
-                password_hash=make_password(password),  # Hash the password
+                password_hash=make_password(password), 
                 role=role
             )
 
-            # Create a JWT token for the new user
             payload = {
                     "employee_id" : f"{employee_id}",
                     "role" : f"{role}"
@@ -77,24 +66,6 @@ class Sview(APIView):
         return Response({"message":f'{token}'}, status=status.HTTP_200_OK)
 
 
-# class MachineListView(APIView):
-#     def get(self, request):
-#         machines = Machine.objects.all().values('id', 'name', 'acceleration', 'velocity')
-#         return Response({"machines": list(machines)}, status=status.HTTP_200_OK)
-
-#     def post(self, request):
-#         name = request.data.get('name')
-#         acceleration = request.data.get('acceleration')
-#         velocity = request.data.get('velocity')
-
-#         if not name or acceleration is None or velocity is None:
-#             return Response({"error": "All fields are required."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         machine = Machine(name=name, acceleration=acceleration, velocity=velocity, created_by=request.user)
-#         machine.save()
-
-#         return Response({"message": "Machine created successfully"}, status=status.HTTP_201_CREATED)
-
     
 
 class MachineDetailView(APIView):
@@ -115,11 +86,19 @@ class MachineDetailView(APIView):
 
 class MachineListView(APIView):
     permission_classes = []
-   
+    def get(self, request):
+        token = decode_jwt(request.headers.get('Authorization'))
+        employee_id = token.get('employee_id')
+        role = token.get("role")
+        user = User.objects.get(employee_id=employee_id)
+        if not user:
+            return Response({"error": "Employee details"}, status=status.HTTP_400_BAD_REQUEST)
+        machines = Machine.objects.all()
+        serializer = MachineSerializer(machines, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        current_user = request.user
-        print(request.headers.get('Authorization'))
+        # print(request.headers.get('Authorization'))
         token = decode_jwt(request.headers.get('Authorization'))
         employee_id = token.get('employee_id')
         role = token.get("role")
@@ -132,7 +111,6 @@ class MachineListView(APIView):
 
         machine_name = data['name']
         
-        # Check role restrictions
         if role.lower() == 'operator':
             return Response({"error": "Operators are not allowed to perform this action."}, status=status.HTTP_403_FORBIDDEN)
         
@@ -141,20 +119,12 @@ class MachineListView(APIView):
             if not machine:
                 return Response({"error": f"Permission denied for role {role}"}, status=status.HTTP_403_FORBIDDEN)
 
-        # Check if machine exists
         machine = Machine.objects.filter(name=machine_name,acceleration=data['acceleration'], velocity=data['velocity']).first()
-        # if not machine:
-        #     machine = Machine.objects.create(
-        #         name=machine_name,
-        #         acceleration=data['acceleration'],
-        #         velocity=data['velocity']
-        #     )
+    
         if machine:
-        # Check if dynamic data exists
             print("machine id ",machine.id)
             latest_dynamic_data = DynamicData.objects.filter(
-                machine_id=machine,
-                user_id=user,
+                machine_id=machine.id,
                 actual_position_x=data['actual_position']['x'],
                 actual_position_y=data['actual_position']['y'],
                 actual_position_z=data['actual_position']['z'],
@@ -258,14 +228,7 @@ class MachineListView(APIView):
 
 
 
-def encode_jwt(payload, expiration_minutes=30):
-    """
-    Encrypts the payload into a JWT token.
-
-    :param payload: Dictionary containing the data to be encoded in the JWT.
-    :param expiration_minutes: Number of minutes until the token expires.
-    :return: Encrypted JWT token as a string.
-    """
+def encode_jwt(payload, expiration_minutes=30000):
     ALGORITHM = 'HS256'
     SECRET_KEY = "hrtshrthththte"
     expiration = datetime.utcnow() + timedelta(minutes=expiration_minutes)
@@ -276,14 +239,6 @@ def encode_jwt(payload, expiration_minutes=30):
 
 
 def decode_jwt(token):
-    """
-    Decrypts the JWT token and returns the payload.
-
-    :param token: JWT token to be decoded.
-    :return: Decoded payload as a dictionary.
-    :raises jwt.ExpiredSignatureError: Raised when the token has expired.
-    :raises jwt.InvalidTokenError: Raised when the token is invalid.
-    """
     SECRET_KEY = "hrtshrthththte"
     ALGORITHM = 'HS256'
     try:

@@ -37,8 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'machines_app',  # Add this line
-    'rest_framework',  # REST framework for API
+    'machines_app',  
+    'rest_framework',  
     'rest_framework_simplejwt',  
 ]
 
@@ -135,26 +135,7 @@ REST_FRAMEWORK = {
 
 
 
-# settings.py
 
-from datetime import timedelta
-from rest_framework_simplejwt.authentication import JWTAuthentication
-
-# settings.py
-from datetime import timedelta
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=36500),  # 100 years, effectively non-expiring
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=36500),  # 100 years, effectively non-expiring
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': False,
-    'ALGORITHM': 'HS256',
-    'SIGNING_KEY': 'your_secret_key',  # Replace with your actual secret key
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'USER_ID_FIELD': 'employee_id',
-    'USER_ID_CLAIM': 'employee_id',
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-}
 
 
 REST_FRAMEWORK = {
