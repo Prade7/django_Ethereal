@@ -126,8 +126,7 @@ curl -X POST http://localhost:8000/login/ \
     ```
 
 
-
-## Setup
+- **Setup**
 
 1. **Install Dependencies**
     ```bash
@@ -147,8 +146,8 @@ curl -X POST http://localhost:8000/login/ \
     python manage.py runserver
     ```
 
+- **note**
 
-## note
 
  ** Please find the url for viewing the data in browser - JWT not required**
 
