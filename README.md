@@ -12,7 +12,6 @@ This Django application provides a backend API for managing user login and machi
 
 - `machines_app/models.py`: Defines the models for `User`, `Machine`, and `DynamicData`.
 - `machines_app/views.py`: Contains the views for user login and machine data operations.
-- `machines_app/utils.py`: Includes utility functions for encoding and decoding JWT.
 - `manage.py`: Django's command-line utility for administrative tasks.
 
 ## Models
