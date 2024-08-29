@@ -113,7 +113,7 @@ def main():
         machines = parse_cnc_file(file_path)
         for machine in machines:
             send_machine_data(machine)
-        time.sleep(1)
+        time.sleep(0.5)
 
 if __name__ == '__main__':
     main()
